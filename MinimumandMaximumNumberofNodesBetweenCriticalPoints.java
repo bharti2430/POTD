@@ -31,13 +31,10 @@ public int[] nodesBetweenCriticalPoints(ListNode head) {
             result[1]=-1;
             return result;
         }
-        int mini=Integer.MAX_VALUE,maxi=Integer.MIN_VALUE;
-        for(int i=0;i<size;i++){
-            for(int j=i+1;j<size;j++){
-                int diff=count.get(j)-count.get(i);
-                maxi=Math.max(maxi,diff);
-                mini=Math.min(mini,diff);
-            }
+        int mini=Integer.MAX_VALUE,maxi=count.get(size-1)-count.get(0);
+        for(int i=1;i<size;i++){
+            int diff=count.get(i)-count.get(i-1);
+            mini=Math.min(mini,diff);
         }
         result[0]=mini;
         result[1]=maxi;
@@ -49,8 +46,34 @@ Output: [-1,-1]
 Input: head = [5,3,1,2,5,1,2]
 Output: [1,3]
 
-int mini=Integer.MAX_VALUE,maxi=count.get(size-1)-count.get(0);
-for(int i=1;i<size;i++){
-    int diff=count.get(i)-count.get(i-1);
-    mini=Math.min(mini,diff);
-}
+// optimal without using extra space
+public int[] nodesBetweenCriticalPoints(ListNode head) {
+        int result[]={-1,-1};
+        if(head==null || head.next==null || head.next.next==null){
+            return result;
+        }
+        int mini=Integer.MAX_VALUE;
+        ListNode temp=head.next,prevNode=head,nextNode=null;
+        int currentIndex=1,prevCriticalIndex=0,firstCriticalIndex=0;
+        while(temp.next!=null){
+            nextNode=temp.next;
+            if((temp.val>nextNode.val && temp.val>prevNode.val) || (temp.val<nextNode.val && temp.val<prevNode.val))
+               {
+                    if(prevCriticalIndex==0){
+                        prevCriticalIndex=currentIndex;
+                        firstCriticalIndex=currentIndex;
+                    } else{
+                        mini=Math.min(mini,currentIndex-prevCriticalIndex);
+                        prevCriticalIndex=currentIndex;
+                    }
+               }
+            currentIndex++;
+            prevNode= temp;
+            temp=temp.next;    
+        }
+        if(mini!=Integer.MAX_VALUE){
+            int maxi=prevCriticalIndex-firstCriticalIndex;
+            result=new int[]{mini,maxi};
+        }
+        return result;
+    }
